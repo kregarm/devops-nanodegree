@@ -39,7 +39,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Ref": "EnvironmentName" }
+                        "Value": {"Fn::Sub": ["${envname} VPC",{"envname": {"Ref": "EnvironmentName"}}]}
                     }
                 ]
             }
@@ -50,7 +50,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Ref": "EnvironmentName" }
+                        "Value": {"Fn::Sub": ["${envname} Internet Gateway",{"envname": {"Ref": "EnvironmentName"}}]}
                     }
                 ]
             }
@@ -72,7 +72,7 @@
                 "Tags": [
                     { 
                         "Key": "Name",
-                        "Value": { "Ref": "EnvironmentName" }
+                        "Value": {"Fn::Sub": ["${envname} Public Subnet 1",{"envname": {"Ref": "EnvironmentName"}}]}
                     }
                 ]
 
@@ -88,7 +88,7 @@
                 "Tags": [
                     { 
                         "Key": "Name",
-                        "Value": { "Ref": "EnvironmentName" }
+                        "Value": {"Fn::Sub": ["${envname} Public Subnet 2",{"envname": {"Ref": "EnvironmentName"}}]}
                     }
                 ]
             }
@@ -103,7 +103,7 @@
                 "Tags": [
                     { 
                         "Key": "Name",
-                        "Value": { "Ref": "EnvironmentName" }
+                        "Value": {"Fn::Sub": ["${envname} Private Subnet 1",{"envname": {"Ref": "EnvironmentName"}}]}
                     }
                 ]
             }
@@ -118,7 +118,7 @@
                 "Tags": [
                     { 
                         "Key": "Name",
-                        "Value": { "Ref": "EnvironmentName" }
+                        "Value": {"Fn::Sub": ["${envname} Private Subnet 2",{"envname": {"Ref": "EnvironmentName"}}]}
                     }
                 ]
             }
@@ -145,6 +145,89 @@
             "Properties": {
                 "AllocationId": { "Fn::GetAtt" : [ "NatGateway2EIP" , "AllocationId" ]}, 
                 "SubnetId": { "Ref": "PublicSubnet1" }
+            }
+        },
+        "PublicRouteTable": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": { "Ref": "VPC" },
+                "Tags":[{
+                    "Key": "Name",
+                    "Value": { "Ref": "EnvironmentName" }
+                }]
+            }
+        },
+        "DefaultPublicRoute": {
+            "Type":"AWS::EC2::Route",
+            "DependsOn": "InternetGatewayAttachment",
+            "Properties": {
+                "RouteTableId": { "Ref": "PublicRouteTable" },
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "GatewayId": { "Ref": "InternetGateway" }
+            }
+        },
+        "PublicSubnet1RouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": { "Ref": "PublicRouteTable" },
+                "SubnetId": { "Ref": "PublicSubnet1" }
+            }
+        },
+        "PublicSubnet2RouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": { "Ref": "PublicRouteTable" },
+                "SubnetId": { "Ref": "PublicSubnet2" }
+            }
+        },
+        "PrivateRouteTable1": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": { "Ref": "VPC" },
+                "Tags":[{
+                    "Key": "Name",
+                    "Value": {"Fn::Sub": ["${envname} Private Route Table 1",{"envname": {"Ref": "EnvironmentName"}}]}
+                }]
+            }
+        },
+        "DefaultPrivateRoute1": {
+            "Type": "AWS::EC2::Route",
+            "Properties": {
+                "RouteTableId": { "Ref": "PrivateRouteTable1" },
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "NatGatewayId": { "Ref": "NatGateway1" }
+            }
+        },
+        "PrivateSubnet1RouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": { "Ref": "PrivateRouteTable1" },
+                "SubnetId": { "Ref": "PrivateSubnet1" }
+            }
+        },
+        "PrivateRouteTable2": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": { "Ref": "VPC" },
+                "Tags":[{
+                    "Key": "Name",
+                    "Value": {"Fn::Sub": ["${envname} Private Route Table 2",{"envname": {"Ref": "EnvironmentName"}}]}
+                }]
+            }
+        },
+        "DefaultPrivateRoute2": {
+            "Type": "AWS::EC2::Route",
+            "Properties": {
+                "RouteTableId": { "Ref": "PrivateRouteTable2" },
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "NatGatewayId": { "Ref": "NatGateway2" }
+            }
+        },
+        "PrivateSubnet2RouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": { "Ref": "PrivateRouteTable2" },
+                "SubnetId": { "Ref": "PrivateSubnet2" }
             }
         }
     }
