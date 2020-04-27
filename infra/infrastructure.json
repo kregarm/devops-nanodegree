@@ -4,7 +4,7 @@
             "Description": "An Environment name that will be prefixed to resources",
             "Type": "String"
         },
-        "VpcCIDER": {
+        "VpcCIDR": {
             "Description": "Please enter the IP range (CIDR notation) for this",
             "Type": "String",
             "Default": "10.0.0.0/16"
@@ -34,7 +34,7 @@
         "VPC": {
             "Type": "AWS::EC2::VPC",
             "Properties": {
-                "CidrBlock": { "Ref": "VpcCIDER" },
+                "CidrBlock": { "Ref": "VpcCIDR" },
                 "EnableDnsHostnames": true,
                 "Tags": [
                     {
@@ -257,49 +257,49 @@
             "Description": "Private Routing AZ1",
             "Value": { "Ref": "PrivateRouteTable2" },
             "Export": {
-                "Name": {"Fn::Sub": ["${envname}-PRI2-RT",{"envname": {"Ref": "EnvironmentName"}}]}
+                "Name": {"Fn::Sub": ["${EnvironmentName}-PRI2-RT",{"EnvironmentName": {"Ref": "EnvironmentName"}}]}
             }
         },
         "PublicSubnets":{
             "Description": "A list of the public subnets",
             "Value": { "Fn::Join": [",", [{"Ref" : "PublicSubnet1"},{"Ref" : "PublicSubnet2"}]]},
             "Export": {
-                "Name": {"Fn::Sub": ["${envname}-PUB-NETS",{"envname": {"Ref": "EnvironmentName"}}]}
+                "Name": {"Fn::Sub": ["${EnvironmentName}-PUB-NETS",{"EnvironmentName": {"Ref": "EnvironmentName"}}]}
             }
         },
         "PrivateSubnets":{
             "Description": "A list of the private subnets",
             "Value": { "Fn::Join": [",", [{"Ref" : "PrivateSubnet1"},{"Ref" : "PrivateSubnet2"}]]},
             "Export": {
-                "Name": {"Fn::Sub": ["${envname}-PRIV-NETS",{"envname": {"Ref": "EnvironmentName"}}]}
+                "Name": {"Fn::Sub": ["${EnvironmentName}-PRIV-NETS",{"EnvironmentName": {"Ref": "EnvironmentName"}}]}
             }
         },
         "PublicSubnet1":{
             "Description": "A reference to the public subnet in the 1st Availability Zone",
             "Value": { "Ref": "PublicSubnet1" },
             "Export": {
-                "Name": {"Fn::Sub": ["${envname}-PUB1-SN",{"envname": {"Ref": "EnvironmentName"}}]}
+                "Name": {"Fn::Sub": ["${EnvironmentName}-PUB1-SN",{"EnvironmentName": {"Ref": "EnvironmentName"}}]}
             }
         },
         "PublicSubnet2":{
             "Description": "A reference to the public subnet in the 2nd Availability Zone",
             "Value": { "Ref": "PublicSubnet2" },
             "Export": {
-                "Name": {"Fn::Sub": ["${envname}-PUB2-SN",{"envname": {"Ref": "EnvironmentName"}}]}
+                "Name": {"Fn::Sub": ["${EnvironmentName}-PUB2-SN",{"EnvironmentName": {"Ref": "EnvironmentName"}}]}
             }
         },
         "PrivateSubnet1":{
             "Description": "A reference to the private subnet in the 1st Availability Zone",
             "Value": { "Ref": "PrivateSubnet1" },
             "Export": {
-                "Name": {"Fn::Sub": ["${envname}-PRIV1-SN",{"envname": {"Ref": "EnvironmentName"}}]}
+                "Name": {"Fn::Sub": ["${EnvironmentName}-PRIV1-SN",{"EnvironmentName": {"Ref": "EnvironmentName"}}]}
             }
         },
         "PrivateSubnet2":{
             "Description": "A reference to the private subnet in the 2nd Availability Zone",
             "Value": { "Ref": "PrivateSubnet2" },
             "Export": {
-                "Name": {"Fn::Sub": ["${envname}-PRIV2-SN",{"envname": {"Ref": "EnvironmentName"}}]}
+                "Name": {"Fn::Sub": ["${EnvironmentName}-PRIV2-SN",{"EnvironmentName": {"Ref": "EnvironmentName"}}]}
             }
         }
     }
