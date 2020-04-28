@@ -112,7 +112,7 @@
                 "VPCZoneIdentifier": [
                     {
                         "Fn::ImportValue": {
-                            "Fn::Sub": "${EnvironmentName}-PUB-NETS"
+                            "Fn::Sub": "${EnvironmentName}-PRIV-NETS"
                         }
                     }
                 ],
