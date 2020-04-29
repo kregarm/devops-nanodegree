@@ -6,6 +6,14 @@
         }
     },
     "Resources": {
+        "Role": {
+            "Type": "AWS::IAM::InstanceProfile",
+            "Properties": {
+                "Roles": [
+                    "EC2S3ReadOnly"
+                ]
+            }
+        },
         "LBSecGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
@@ -21,19 +29,14 @@
                     "ToPort": "80",
                     "CidrIp": "0.0.0.0/0"
                 },
-                "SecurityGroupEgress": [{
-                    "IpProtocol": "tcp",
-                    "FromPort": "80",
-                    "ToPort": "80",
-                    "CidrIp": "0.0.0.0/0"
-                },
-                {
-                    "IpProtocol": "tcp",
-                    "FromPort": "8080",
-                    "ToPort": "8080",
-                    "CidrIp": "0.0.0.0/0"
-                }
-            ]
+                "SecurityGroupEgress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "80",
+                        "ToPort": "80",
+                        "CidrIp": "0.0.0.0/0"
+                    }
+                ]
             }
         },
         "WebServerSecGroup": {
@@ -48,14 +51,8 @@
                 "SecurityGroupIngress": [
                     {
                         "IpProtocol": "tcp",
-                        "FromPort": "8080",
-                        "ToPort": "8080",
-                        "CidrIp": "0.0.0.0/0"
-                    },
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "22",
-                        "ToPort": "22",
+                        "FromPort": "80",
+                        "ToPort": "80",
                         "CidrIp": "0.0.0.0/0"
                     }
                 ],
@@ -70,26 +67,27 @@
         "WebAppLaunchConfig": {
             "Type": "AWS::AutoScaling::LaunchConfiguration",
             "Properties": {
+                "IamInstanceProfile": {
+                    "Ref": "Role"
+                },
                 "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": [
                             "\n",
                             [
                                 "#!/bin/bash",
-                                "sudo apt-get update",
-                                "sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common",
-                                "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -",
-                                "sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\" ",
-                                "sudo apt-get update",
-                                "sudo apt-get install -y docker-ce",
-                                "sudo usermod -aG docker ubuntu",
-                                "docker run -p 8080:8080 tomcat:8.0"
+                                "apt-get update -y",
+                                "apt-get install unzip awscli -y",
+                                "apt-get install apache2 -y",
+                                "systemctl start apache2.service",
+                                "cd /var/www/html",
+                                "aws s3 cp s3://udacity-demo-1/udacity.zip .",
+                                "unzip -o udacity.zip"
                             ]
                         ]
                     }
                 },
                 "ImageId": "ami-0b199ce4c7f1a6dd2",
-                "KeyName": "udacity-project",
                 "SecurityGroups": [
                     {
                         "Ref": "WebServerSecGroup"
@@ -182,7 +180,9 @@
                 "Conditions": [
                     {
                         "Field": "path-pattern",
-                        "Values": ["/"]
+                        "Values": [
+                            "/"
+                        ]
                     }
                 ],
                 "ListenerArn": {
@@ -199,7 +199,7 @@
                 "HealthCheckProtocol": "HTTP",
                 "HealthCheckTimeoutSeconds": "8",
                 "HealthyThresholdCount": "2",
-                "Port": "8080",
+                "Port": "80",
                 "Protocol": "HTTP",
                 "UnhealthyThresholdCount": "5",
                 "VpcId": {
@@ -210,10 +210,22 @@
             }
         }
     },
-    "Outputs":{
+    "Outputs": {
         "LoadBalancerDNSName": {
             "Description": "DNS name for loadbalancer",
-            "Value": { "Fn::Sub": ["http://${dnsname}",{"dnsname": {"Fn::GetAtt" : [ "WebAppLB", "DNSName" ]}}] }
+            "Value": {
+                "Fn::Sub": [
+                    "http://${dnsname}",
+                    {
+                        "dnsname": {
+                            "Fn::GetAtt": [
+                                "WebAppLB",
+                                "DNSName"
+                            ]
+                        }
+                    }
+                ]
+            }
         }
     }
 }
